@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         // Points directly to your Python executable
-        PYTHON_EXE = 'C:\\Users\\23251\\AppData\\Local\\Microsoft\\WindowsApps\\python.exe'
+        PYTHON_EXE = 'C:\Users\23251\AppData\Local\Microsoft\WindowsApps\python.exe'
     }
 
     stages {
@@ -30,7 +30,7 @@ pipeline {
             steps {
                 echo "Logging into Docker Hub"
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    bat "docker login -u %DOCKER_USER% -p %DOCKER_PASS%"
+                    bat "docker login -u Jaya02sri26 -p Jaya@sri26"
                 }
             }
         }
