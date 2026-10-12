@@ -1,20 +1,20 @@
 pipeline {
     agent any
 
+
     stages {
         stage('Run Selenium Tests with pytest') {
             steps {
                 echo "Running Selenium Tests using pytest"
 
                 // Install Python dependencies
-                bat 'python -m pip install --upgrade pip'
-                bat 'python -m pip install -r requirements.txt'
+                bat 'pip install -r requirements.txt'
 
                 // Start Flask app in background
                 bat 'start /B python app.py'
 
                 // Wait for Flask to start
-                bat 'timeout /T 5'
+                bat 'ping 127.0.0.1 -n 5 > nul'
 
                 // Run Selenium tests
                 bat 'python -m pytest -v'
@@ -31,9 +31,7 @@ pipeline {
         stage('Docker Login') {
             steps {
                 echo "Logging into Docker Hub"
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    bat "docker login -u %DOCKER_USER% -p %DOCKER_PASS%"
-                }
+                bat 'docker login -u Jaya02sri26 -p Jaya@sri2'
             }
         }
 
@@ -63,4 +61,4 @@ pipeline {
             echo '❌ Pipeline failed. Please check the logs.'
         }
     }
-}
+} it is my full jenkins code
