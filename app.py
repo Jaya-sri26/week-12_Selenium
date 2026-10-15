@@ -6,10 +6,10 @@ app = Flask(__name__)
 def index():
     return render_template('register.html')
 
-@app.route('/register', methods=['POST'])
-def register():
+@app.route('/submit', methods=['POST'])
+def submit():
     username = request.form['username']
-    return render_template('successful.html', username=username)
+    return render_template('successful.html', name=username)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)
