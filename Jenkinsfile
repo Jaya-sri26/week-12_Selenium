@@ -9,7 +9,7 @@ pipeline {
 
                     // Install Python dependencies
                     
-bat '"C:\\Users\\23251\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\\python.exe" -m pip install -r requirements.txt'
+bat '"C:\Users\23251\AppData\Local\Python\pythoncore-3.15-64\python.exe" -m pip install -r requirements.txt'
 
 
                     //  Start Flask app in background
