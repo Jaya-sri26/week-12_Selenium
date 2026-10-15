@@ -1,27 +1,23 @@
 pipeline {
     agent any
-   
+
     stages {
 
         stage('Run Selenium Tests with pytest') {
             steps {
-                    echo "Running Selenium Tests using pytest"
+                echo "Running Selenium Tests using pytest"
 
-                    // Install Python dependencies
-                    
-bat '"C:\\Users\\23251\\AppData\\Local\\Python\\pythoncore-3.15-64\\python.exe" -m pip install -r requirements.txt'
+                // Install Python dependencies
+                bat '"C:\\Users\\23251\\AppData\\Local\\Python\\pythoncore-3.15-64\\python.exe" -m pip install -r requirements.txt'
 
+                // Start Flask app in background
+                bat 'start /B python app.py'
 
+                // Wait a few seconds for the server to start
+                bat 'ping 127.0.0.1 -n 5 > nul'
 
-                    //  Start Flask app in background
-                    bat 'start /B python app.py'
-
-                    // Wait a few seconds for the server to start
-                    bat 'ping 127.0.0.1 -n 5 > nul'
-
-                    // Run tests using pytest
-                    
-                    bat 'python -m pytest -v'
+                // Run tests using pytest
+                bat 'python -m pytest -v'
             }
         }
 
@@ -31,28 +27,30 @@ bat '"C:\\Users\\23251\\AppData\\Local\\Python\\pythoncore-3.15-64\\python.exe" 
                 bat "docker build -t seleniumdemoapp:v1 ."
             }
         }
+
         stage('Docker Login') {
             steps {
-                  bat 'docker login -u jaya02sri26 -p Jaya@sri26'
-                }
-            }
-        stage('push Docker Image to Docker Hub') {
-            steps {
-                echo "push Docker Image to Docker Hub"
-                bat "docker tag seleniumdemoapp:v1 jaya02sri26/selenium:seleniumtestimage"               
-                    
-                bat "docker push jaya02sri26/selenium:seleniumtestimage"
-                
+                bat 'docker login -u jaya02sri26 -p Jaya@sri26'
             }
         }
-        stage('Deploy to Kubernetes') { 
-            steps { 
-                    // apply deployment & service 
-                    bat 'kubectl apply -f deployment.yaml --validate=false' 
-                    bat 'kubectl apply -f service.yaml' 
-            } 
+
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                echo "Push Docker Image to Docker Hub"
+                bat "docker tag seleniumdemoapp:v1 jaya02sri26/selenium:seleniumtestimage"
+                bat "docker push jaya02sri26/selenium:seleniumtestimage"
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                // apply deployment & service
+                bat 'kubectl apply -f deployment.yaml --validate=false'
+                bat 'kubectl apply -f service.yaml'
+            }
         }
     }
+
     post {
         success {
             echo 'Pipeline completed successfully!'
