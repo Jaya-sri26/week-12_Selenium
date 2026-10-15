@@ -1,68 +1,61 @@
 pipeline {
     agent any
-
-    environment {
-        // Points directly to your Python executable
-        PYTHON_EXE = 'C:\Users\23251\AppData\Local\Microsoft\WindowsApps\python.exe'
-    }
-
+   
     stages {
+
         stage('Run Selenium Tests with pytest') {
             steps {
-                echo "Running Selenium Tests using pytest"
-                bat '''
-                    "%PYTHON_EXE%" -m pip install -r requirements.txt
-                    start /B "" "%PYTHON_EXE%" app.py
-                    timeout /T 5 /NOBREAK
-                    "%PYTHON_EXE%" -m pytest -v
-                '''
+                    echo "Running Selenium Tests using pytest"
+
+                    // Install Python dependencies
+                    bat 'pip install -r requirements.txt'
+
+                    //  Start Flask app in background
+                    bat 'start /B python app.py'
+
+                    // Wait a few seconds for the server to start
+                    bat 'ping 127.0.0.1 -n 5 > nul'
+
+                    // Run tests using pytest
+                    
+                    bat 'python -m pytest -v'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                echo "Building Docker Image"
-                bat "docker build -t jaya02sri26/selenium:seleniumimage ."
+                echo "Build Docker Image"
+                bat "docker build -t seleniumdemoapp:v1 ."
             }
         }
-
         stage('Docker Login') {
             steps {
-                echo "Logging into Docker Hub"
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    bat "docker login -u Jaya02sri26 -p Jaya@sri26"
+                  bat 'docker login -u jaya02sri26 -p Jaya@sri2'
                 }
             }
-        }
-
-        stage('Push Docker Image to Docker Hub') {
+        stage('push Docker Image to Docker Hub') {
             steps {
-                echo "Pushing Docker Image to Docker Hub"
-                bat "docker push jaya02sri26/selenium:seleniumimage"
+                echo "push Docker Image to Docker Hub"
+                bat "docker tag seleniumdemoapp:v1 jaya02sri26/selenium:seleniumtestimage"               
+                    
+                bat "docker push jaya02sri26/selenium:seleniumtestimage"
+                
             }
         }
-
-        stage('Deploy to Kubernetes') {
-            steps {
-                echo "Deploying to Kubernetes"
-                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-                    bat 'kubectl apply -f deployment.yaml --validate=false'
-                    bat 'kubectl apply -f service.yaml'
-                }
-            }
+        stage('Deploy to Kubernetes') { 
+            steps { 
+                    // apply deployment & service 
+                    bat 'kubectl apply -f deployment.yaml --validate=false' 
+                    bat 'kubectl apply -f service.yaml' 
+            } 
         }
     }
-
     post {
-        always {
-            // Stops background Flask/FastAPI app process so it doesn't lock port 5000/8000
-            bat 'taskkill /F /IM python.exe 2>nul || exit 0'
-        }
         success {
-            echo '✅ Pipeline completed successfully!'
+            echo 'Pipeline completed successfully!'
         }
         failure {
-            echo '❌ Pipeline failed. Please check the logs.'
+            echo 'Pipeline failed. Please check the logs.'
         }
     }
 }
